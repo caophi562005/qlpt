@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info: { title: Rental Management API, version: 1.0.0 }
+servers: [{ url: http://localhost:8000/api }]
+paths:
+  /api/auth/login/:
+    post:
+      summary: Đăng nhập
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access: { type: string }
+                  refresh: { type: string }
+                  user:
+                    $ref: "#/components/schemas/User"
+
+  /api/auth/register/:
+    post:
+      summary: Đăng ký tài khoản
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, full_name, role, password, password_confirm]
+              properties:
+                email: { type: string, format: email }
+                full_name: { type: string, minLength: 2 }
+                role: { type: string, enum: [OWNER, TENANT, TECH], default: TENANT }
+                password: { type: string, format: password, minLength: 8 }
+                password_confirm: { type: string, format: password }
+      responses:
+        "201":
+          description: Tạo tài khoản thành công, trả JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      email: { type: string, format: email }
+                      full_name: { type: string }
+                      role: { type: string }
+                  access: { type: string }
+                  refresh: { type: string }
+        "400":
+          description: Dữ liệu không hợp lệ
+
+  /api/rooms:
+    get:
+      summary: Danh sách phòng
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [EMPTY, RENTED, MAINT] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: "#/components/schemas/Room" }
+                  count: { type: integer }
+
+    post:
+      summary: Tạo phòng
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RoomCreate" }
+      responses: { "201": { description: Created } }
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        full_name: { type: string }
+        role: { type: string, enum: [OWNER, TENANT, TECH] }
+
+    Room:
+      type: object
+      properties:
+        id: { type: integer }
+        building_id: { type: integer }
+        name: { type: string }
+        area_m2: { type: number }
+        base_price: { type: number }
+        status: { type: string, enum: [EMPTY, RENTED, MAINT] }
+
+    RoomCreate:
+      type: object
+      required: [building_id, name, base_price]
+      properties:
+        building_id: { type: integer }
+        name: { type: string }
+        area_m2: { type: number }
+        base_price: { type: number }
+        status: { type: string, enum: [EMPTY, RENTED, MAINT], default: EMPTY }
