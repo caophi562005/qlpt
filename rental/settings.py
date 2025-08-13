@@ -52,6 +52,22 @@ AUTH_USER_MODEL = "accounts.User"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "https://your-frontend-domain.com",
+    "http://localhost:5173",
+    "https://k9z2h1t3-5173.asse.devtunnels.ms",
+]
+
+# Thêm cấu hình CORS để hỗ trợ phát triển
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 REST_FRAMEWORK = {
@@ -72,6 +88,7 @@ REST_FRAMEWORK.update({
 })
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -121,8 +138,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "rental_db",
-        "USER": "rental_user",
-        "PASSWORD": "strong_password",
+        "USER": "root",
+        "PASSWORD": "",
         "HOST": "127.0.0.1",
         "PORT": "3306",
         "OPTIONS": {
